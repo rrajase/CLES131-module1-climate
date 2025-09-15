@@ -9,13 +9,14 @@ editor: visual
 #| output-location: false
 library(tidyverse)
 ```
+
 ## Team members, etc
-List your team member(s):
 
-Include a link to your forked GH repository:
+List your team member(s): Ria Rajasekar
 
-Include a link to your .qmd file:
+Include a link to your forked GH repository: <https://github.com/rrajase/CLES131-module1-climate>
 
+Include a link to your .qmd file: <https://github.com/rrajase/CLES131-module1-climate/blob/main/module1.qmd>
 
 ## CO2 trends from Mauna Loa
 
@@ -72,9 +73,10 @@ Plot the trend in global mean temperature over time. Describe what you see and h
 
 ### Q7 (1 point)
 
-Consider the "pause" analyzed in Lewandowsky et al. 2016. Do you see evidence for such a pause? 
+Consider the "pause" analyzed in Lewandowsky et al. 2016. Do you see evidence for such a pause?
 
 ### Bonus 1 (1 point)
+
 Recreate the analysis from Lewandowsky's Fig. 1.
 
 ## Long term records of CO2
@@ -98,4 +100,5 @@ Transform the data as needed to create a plot in chronological order. Add at lea
 Join your data with the Mauna Loa data and plot together, considering different colors for the different datasets.
 
 ### Bonus 2 (1 point)
+
 Write a catchy title and short description in the style of a NYtimes infographic, contrasting the rate of anthropogenic vs. background climate change for a general public audience.
