@@ -45,13 +45,35 @@ head(co2)
 
 Create a timeseries plot of average \[CO~2~\]. Use `as.Date()` to create a formatted date for the x-axis. Label both the y-axis and add a line to connect the points.
 
+```{r}
+ggplot(data=co2 |> drop_na(), 
+       mapping = aes(x = as.Date(decimal_date),
+                     y = average)) + 
+  geom_point() +
+  geom_line()
+```
+
 ### Q2 (1 point)
 
 What months are the \[CO~2~\] values at the maximum? Create another dataframe with these months selected and create a plot like above, but with the maximum months colored in "forestgreen".
 
+```{r}
+highCO2 <- co2 |> filter(month == 5)
+
+ggplot(data=highCO2 |> drop_na(), 
+       mapping = aes(x = as.Date(decimal_date),
+                     y = average)) + 
+  geom_point() +
+  geom_line() +
+  scale_x_date("Date") +
+  scale_y_continuous("Average CO2 Emissions")
+```
+
 ### Q3 (1 point)
 
 What explains the seasonal variation in \[CO~2~\]? After reading Lewandowsky et al. 2016, how might you go about separating the long term trend and the seasonal variation in \[CO~2~\]?
+
+This data was collected in Hawaii in the Northern Hemisphere, so we know that CO2 levels peak in the hottest months. I assume that the plantlife drying up and dying in summer contributes to the seasonal spikes.
 
 ## Global temperature
 
