@@ -8,6 +8,7 @@ editor: visual
 #| warning: false
 #| output-location: false
 library(tidyverse)
+library(tidyquant)
 ```
 
 ## Team members, etc
@@ -43,25 +44,14 @@ head(co2)
 
 ### Q1 (1 point)
 
-Create a timeseries plot of average \[CO~2~\]. Use `as.Date()` to create a formatted date for the x-axis. Label both the y-axis and add a line to connect the points.
+##### Create a timeseries plot of average \[CO~2~\]. Use `as.Date()` to create a formatted date for the x-axis. Label both the y-axis and add a line to connect the points.
 
 ```{r}
-ggplot(data=co2 |> drop_na(), 
-       mapping = aes(x = as.Date(decimal_date),
-                     y = average)) + 
-  geom_point() +
-  geom_line()
-```
+#following this Reddit post: https://www.reddit.com/r/Rlanguage/comments/llctee/comment/gnp7nyn/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+co2$Date <- as.Date(paste(co2$year, co2$month, 01), "%Y %m %d")
 
-### Q2 (1 point)
-
-What months are the \[CO~2~\] values at the maximum? Create another dataframe with these months selected and create a plot like above, but with the maximum months colored in "forestgreen".
-
-```{r}
-highCO2 <- co2 |> filter(month == 5)
-
-ggplot(data=highCO2 |> drop_na(), 
-       mapping = aes(x = as.Date(decimal_date),
+ggplot(data=co2, 
+       mapping = aes(x = Date,
                      y = average)) + 
   geom_point() +
   geom_line() +
@@ -69,11 +59,33 @@ ggplot(data=highCO2 |> drop_na(),
   scale_y_continuous("Average CO2 Emissions")
 ```
 
+### Q2 (1 point)
+
+##### What months are the \[CO~2~\] values at the maximum? Create another dataframe with these months selected and create a plot like above, but with the maximum months colored in "forestgreen".
+
+```{r}
+highCO2 <- co2 |> 
+  filter(month %in% c(4,5,6))
+
+ggplot(data=co2, 
+       mapping = aes(x = Date,
+                     y = average)) + 
+  geom_point() +
+  geom_line() +
+  geom_point(data = highCO2, 
+             mapping = aes(x = Date,
+                     y = average),
+             color="forestgreen",
+             size=2) +
+  scale_x_date("Date") +
+  scale_y_continuous("Average CO2 Emissions")
+```
+
 ### Q3 (1 point)
 
-What explains the seasonal variation in \[CO~2~\]? After reading Lewandowsky et al. 2016, how might you go about separating the long term trend and the seasonal variation in \[CO~2~\]?
+##### What explains the seasonal variation in \[CO~2~\]? After reading Lewandowsky et al. 2016, how might you go about separating the long term trend and the seasonal variation in \[CO~2~\]?
 
-This data was collected in Hawaii in the Northern Hemisphere, so we know that CO2 levels peak in the hottest months. I assume that the plantlife drying up and dying in summer contributes to the seasonal spikes.
+This data was collected in Hawaii in the Northern Hemisphere, so we know that CO2 levels peak in the hottest months. I assume that the plantlife drying up and dying in summer contributes to the seasonal spikes. To separate the long term trend vs seasonal variation, I may group the average CO2 by year or many years instead of by month. But even with this graph, it is over long enough of a range to see that CO2 levels on average have been rising since 1960.
 
 ## Global temperature
 
@@ -81,25 +93,65 @@ Next, we turn to a global temperature anomaly dataset from NASA GISS, similar to
 
 ### Q4 (1 point)
 
-Read some [background](https://data.giss.nasa.gov/gistemp/history/background.html) as well as the [simplified documentation](https://climate.nasa.gov/vital-signs/global-temperature/?intent=121) for this dataset.
+##### Read some [background](https://data.giss.nasa.gov/gistemp/history/background.html) as well as the [simplified documentation](https://climate.nasa.gov/vital-signs/global-temperature/?intent=121) for this dataset.
 
-How are the measurements made? Describe each column in the dataset and its units. What are the resolution of the data?
+##### How are the measurements made? Describe each column in the dataset and its units. What are the resolution of the data?
+
+The measurements for this dataset are made by recording temperatures at 80 stations at least 1200 km apart and compiling the recordings into 8 different regions to create a global average temperature difference from the long term trend (using their area-weighted mean).
+
+Year: the year the data was recorded.
+
+No_Smoothing: the annual average Land-Ocean temperature difference in C, without smoothing
+
+Lowess: the annual average Land-Ocean temperature difference in C, with multi-year smoothing to remove annual variations
+
+The data has one entry per year starting from 1880.
 
 ### Q5 (1 point)
 
-Construct code to import dataset in a format that can be used for transforming and visualization.
+##### Construct code to import dataset in a format that can be used for transforming and visualization.
+
+```{r}
+temp <-read_table("https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt", 
+                  skip = 5,
+                  col_names = c("year", "no_smoothing (C)", "lowess (C)"),
+                  na = character())
+
+str(temp)
+head(temp)
+```
 
 ### Q6 (1 point)
 
-Plot the trend in global mean temperature over time. Describe what you see and how you interpret the patterns you observe.
+##### Plot the trend in global mean temperature over time. Describe what you see and how you interpret the patterns you observe.
+
+```{r}
+
+ggplot(data=temp, 
+       mapping = aes(x = year,
+                     y = `no_smoothing (C)`)) + 
+  geom_point() +
+  geom_line(data = temp, 
+             mapping = aes(x = year,
+                     y = `lowess (C)`),
+             color="blue") +
+  scale_x_continuous("Year") +
+  scale_y_continuous("Average Global Temp Anomolies (C)")
+```
+
+To add more context about the data, only North America was recorded until 1980, and an urban adjustment was introduced in 1998. After both of these years, we can see that each point seems to more closely follow the multi-year adjusted smoothed line.
+
+In addition, we see that pre-1940 that temperature differences were typically negative, meaning temperatures were typically colder than the long term average. The line then stays around 0 until 1980, meaning temperatures must've been pretty consistent to the long-term average during this period. After 1980, we can see a constant rise in temperature, showing steady warming happening in our current period.
 
 ### Q7 (1 point)
 
-Consider the "pause" analyzed in Lewandowsky et al. 2016. Do you see evidence for such a pause?
+##### Consider the "pause" analyzed in Lewandowsky et al. 2016. Do you see evidence for such a pause?
+
+The data sharply increases after 1980, looking to grow almost exponentially. Thus, I do not see any evidence of a pause in this graph, but rather average global temperatures increasing at an alarming rate.
 
 ### Bonus 1 (1 point)
 
-Recreate the analysis from Lewandowsky's Fig. 1.
+##### Recreate the analysis from Lewandowsky's Fig. 1.
 
 ## Long term records of CO2
 
@@ -107,20 +159,60 @@ The data from Mauna Loa go back as far as modern instrumentation. To put these v
 
 Previously hosted by Oak Ridge National Lab, the [data](https://zenodo.org/records/3678928) associated with the famed Vostok Ice Core is now archived on Zenodo. Skim [Barnola et al. 1987](https://www.nature.com/articles/329408a0) as needed.
 
-After downloading this dataset, create a folder entitled `data` and save the file within the folder with a .txt extension. Read this file into R, making sure you understand the column names and units.
-
 ### Q8 (1 point)
 
-After downloading this dataset, create a folder entitled `data` and save the file within the folder with a .txt extension. Read this file into R. What are the columns and units? How were these data obtained?
+##### After downloading this dataset, create a folder entitled `data` and save the file within the folder with a .txt extension. Read this file into R. What are the columns and units? How were these data obtained?
+
+```{r}
+ice <-read_table("data/vostok.icecore.co2.txt", 
+                  skip = 5,
+                  col_names = c("depth", "age_ice", "mean_age_air", "co2_conc"),
+                  na = character())
+
+str(ice)
+head(ice)
+```
+
 
 ### Q9 (1 point)
 
-Transform the data as needed to create a plot in chronological order. Add at least two different smoothing window averages to your plot.
+##### Transform the data as needed to create a plot in chronological order. Add at least two different smoothing window averages to your plot.
+
+```{r}
+
+ice$year = 2025-ice$age_ice # transfer age to year for chronological order
+
+# Following this documentation: https://www.rdocumentation.org/packages/tidyquant/versions/1.0.11/topics/geom_ma
+ggplot(data=ice, 
+       mapping = aes(x = year,
+                     y = co2_conc)) + 
+  geom_ma(ma_fun = SMA, n = 10, color = "red",linetype="solid",size=1) + # use 21000 year cycle based on paper, and about ~2k year difference between years
+  geom_ma(ma_fun = SMA, n = 20, color = "blue",linetype="solid",size=1) + # double to get avg of ~2 cycles
+  geom_ma(ma_fun = SMA, n = 5, color = "green",linetype="solid",size=1) + # also half for funsies
+  geom_point() +
+  scale_x_continuous("Year") +
+  scale_y_continuous("CO2 Concentration (ppmv)")
+```
 
 ### Q10 (1 point)
 
-Join your data with the Mauna Loa data and plot together, considering different colors for the different datasets.
+##### Join your data with the Mauna Loa data and plot together, considering different colors for the different datasets.
+
+```{r}
+ggplot(data=co2, 
+       mapping = aes(x = year,
+                     y = average)) + 
+  geom_point() +
+  geom_line() +
+  geom_line(data = ice, 
+             mapping = aes(x = year,
+                     y = co2_conc),
+             color="blue") +
+  scale_x_date("Year") +
+  scale_y_continuous("Average CO2 Emissions/Concentration")
+
+```
 
 ### Bonus 2 (1 point)
 
-Write a catchy title and short description in the style of a NYtimes infographic, contrasting the rate of anthropogenic vs. background climate change for a general public audience.
+##### Write a catchy title and short description in the style of a NYtimes infographic, contrasting the rate of anthropogenic vs. background climate change for a general public audience.
