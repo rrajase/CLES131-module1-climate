@@ -173,6 +173,17 @@ str(ice)
 head(ice)
 ```
 
+Each column and units is as follows:
+
+Depth - The depth of the specific core chunk in meters.
+
+Age_Ice - The age of the specific core chunk in years befroe 1950.
+
+Mean_Age_Air - The average age of air from any air bubbles in the chunk in years before 1950S.
+
+CO2_Conc - The concentration of CO2 in that ice chunk in Parts per Million by Volume.
+
+This data was obtained with the "Grenoble analytical setup", where the ice core is mashed up in a vacuum where scientists can then analyze the CO2 concentration in the released air.
 
 ### Q9 (1 point)
 
@@ -180,7 +191,7 @@ head(ice)
 
 ```{r}
 
-ice$year = 2025-ice$age_ice # transfer age to year for chronological order
+ice$year = 1950-ice$age_ice # transfer age to year for chronological order
 
 # Following this documentation: https://www.rdocumentation.org/packages/tidyquant/versions/1.0.11/topics/geom_ma
 ggplot(data=ice, 
@@ -212,6 +223,8 @@ ggplot(data=co2,
   scale_y_continuous("Average CO2 Emissions/Concentration")
 
 ```
+
+Since the ice core data is from such a longer and older scale of about 2000 years, and Mauna Loa data is only from the past 100ish years, it is a bit hard to see specific data points. However, what we can still see in this graph is that CO2 concentrations have increased drastically in recent years, continuing to increase much higher past any peak in historic cycles.
 
 ### Bonus 2 (1 point)
 
